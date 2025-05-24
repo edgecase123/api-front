@@ -2,16 +2,18 @@
 @import 'tailwindcss';
 
 @plugin "daisyui" {
-  themes: all, abyss --prefersdark;
+  themes:
+    all,
+    abyss --prefersdark;
 }
 
 @layer utilities {
   .table-container {
     @apply overflow-x-auto bg-base-100 rounded-lg shadow-lg w-full
-    p-4 md:p-10 flex flex-col justify-start
+    p-4 md:p-10 flex flex-col justify-start;
   }
 
   .app-link {
-    @apply font-medium text-blue-600 dark:text-blue-500 hover:underline
+    @apply font-medium text-blue-600 dark:text-blue-500 hover:underline;
   }
 }
