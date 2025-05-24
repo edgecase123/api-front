@@ -1,35 +1,17 @@
 @import './base.css';
+@import 'tailwindcss';
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+@plugin "daisyui" {
+  themes: all, abyss --prefersdark;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
+@layer utilities {
+  .table-container {
+    @apply overflow-x-auto bg-base-100 rounded-lg shadow-lg w-full
+    p-4 md:p-10 flex flex-col justify-start
   }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+  .app-link {
+    @apply font-medium text-blue-600 dark:text-blue-500 hover:underline
   }
 }
