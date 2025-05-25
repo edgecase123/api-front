@@ -1,69 +1,51 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type Character from '@/types/Character.ts'
+import { getCharacters } from '@/composables/api.ts'
+import type { CharacterApiResponse } from '@/types/CharacterApiResponse.ts'
 
-const data: Character[] = ref<Character[]>([
-  {
-    name: 'Belegorn',
-    wikiUrl: 'http://lotr.wikia.com//wiki/Belegorn',
-    race: 'Human',
-    birth: 'TA 2074',
-    death: 'TA 2204',
-  },
-  {
-    name: 'Celegorm',
-    wikiUrl: 'http://lotr.wikia.com//wiki/Celegorm',
-    race: 'Elf',
-    birth: 'During in the ,Noontide of Valinor',
-    death: 'FA 506',
-  },
-  {
-    name: 'Legolas',
-    wikiUrl: 'http://lotr.wikia.com//wiki/Legolas',
-    race: 'Elf',
-    birth: null,
-    death: 'Still alive, departed to ,Aman ,FO 120',
-  },
-  {
-    name: 'Legolas (elf of Gondolin)',
-    wikiUrl: 'http://lotr.wikia.com//wiki/Legolas_(elf_of_Gondolin)',
-    race: 'Elf',
-    birth: null,
-    death: null,
-  },
-])
+const data = ref<Character[]>([])
+const loading = ref(false)
+
+const fetchData = async () => {
+
+  loading.value = true
+
+  try {
+    const response: CharacterApiResponse = await getCharacters('Dwarf', 'race')
+    console.log(response)
+
+    data.value = response.data as Character[]
+
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchData)
 </script>
-
 <template>
   <div class="flex w-full mx-auto md:mt-40">
     <div id="app" class="p-4">
       <div class="navbar bg-base-100 shadow-sm">
         <div class="flex-1">
-          <a class="btn btn-ghost text-xl">daisyUI</a>
+          <a class="btn btn-ghost text-xl">LoR Character Search</a>
+          <div class="ml-4 pl-4">
+            <span class="text-neutral-400">Records: {{ data.length }}</span>
+          </div>
         </div>
         <div class="flex gap-2">
           <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+            <div tabindex="0" class="btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">
                 <img
                   alt="Tailwind CSS Navbar component"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  :src="'/images/gandalf.png'"
                 />
               </div>
             </div>
-            <ul
-              tabindex="0"
-              class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-            >
-              <li>
-                <a class="justify-between">
-                  Profile
-                  <span class="badge">New</span>
-                </a>
-              </li>
-              <li><a>Settings</a></li>
-              <li><a>Logout</a></li>
-            </ul>
           </div>
         </div>
       </div>
@@ -79,9 +61,15 @@ const data: Character[] = ref<Character[]>([
           </thead>
           <tbody>
             <!-- Conditionally show busy indicator row or no data row -->
-            <tr v-if="data.length === 0">
+            <tr v-if="data.length === 0 && !loading">
               <td :colspan="4" class="text-center py-4 text-secondary text-2xl">
                 No data available
+              </td>
+            </tr>
+
+            <tr v-if="loading">
+              <td :colspan="4" class="text-center py-4 text-secondary text-2xl">
+                Loading...
               </td>
             </tr>
 
@@ -98,11 +86,6 @@ const data: Character[] = ref<Character[]>([
             </tr>
           </tbody>
         </table>
-        <!--    <div class="flex items-center justify-center mt-4">-->
-        <!--      <div v-if="busy" class="text-info vertical">-->
-        <!--        <i class='bx bx-loader bx-spin mt-8 bx-lg'></i>-->
-        <!--      </div>-->
-        <!--    </div>-->
       </div>
     </div>
   </div>
