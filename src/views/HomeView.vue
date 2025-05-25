@@ -3,20 +3,37 @@ import { onMounted, ref } from 'vue'
 import type Character from '@/types/Character.ts'
 import { getCharacters } from '@/composables/api.ts'
 import type { CharacterApiResponse } from '@/types/CharacterApiResponse.ts'
+import SearchInput, { type SearchPayloadEvent } from '@/components/SearchInput.vue'
 
 const data = ref<Character[]>([])
 const loading = ref(false)
 
-const fetchData = async () => {
+const handleSearch = async (payload: SearchPayloadEvent) => {
+  if (!payload) {
+    console.log('Remove filter and display all')
+  } else {
+    console.log('Fetch Records based on search', payload)
+  }
 
+  await fetchData(payload)
+}
+
+const handleSave = (payload: SearchPayloadEvent) => {
+  console.log('handleSave', payload)
+}
+
+const fetchData = async (searchData?: SearchPayloadEvent | null) => {
   loading.value = true
+  data.value = []
 
   try {
-    const response: CharacterApiResponse = await getCharacters('Dwarf', 'race')
+    const response: CharacterApiResponse = await getCharacters(
+      searchData?.searchTerm ?? null,
+      searchData?.selectedField ?? null
+    )
+
     console.log(response)
-
     data.value = response.data as Character[]
-
   } catch (error) {
     console.error(error)
   } finally {
@@ -28,7 +45,7 @@ onMounted(fetchData)
 </script>
 <template>
   <div class="flex w-full mx-auto md:mt-40">
-    <div id="app" class="p-4">
+    <div class="p-4">
       <div class="navbar bg-base-100 shadow-sm">
         <div class="flex-1">
           <a class="btn btn-ghost text-xl">LoR Character Search</a>
@@ -49,6 +66,16 @@ onMounted(fetchData)
           </div>
         </div>
       </div>
+
+      <div class="pt-4 pb-2 float-right">
+        <SearchInput
+          :fields="{name: 'Name', race: 'Race'}"
+          :min-chars="3"
+          @search="handleSearch"
+          @save="handleSave"
+        />
+      </div>
+
       <div class="table-container overflow-x-hidden">
         <table class="table table-lg table-fixed row-hover w-full">
           <thead>
@@ -74,7 +101,7 @@ onMounted(fetchData)
             </tr>
 
             <tr class="p-0" v-for="(item, index) in data" :key="index">
-              <td v-if="item.wikiUrl">
+              <td>
                 <a v-if="item.wikiUrl" :href="item.wikiUrl" target="_blank" class="app-link">{{
                   item.name
                 }}</a>
