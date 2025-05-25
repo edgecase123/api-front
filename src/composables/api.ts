@@ -12,7 +12,7 @@ interface CharacterParams {
   field?: string | null,
 }
 
-export const getCharacters = async (term?: string, field?: string): Promise<CharacterApiResponse> => {
+export const getCharacters = async (term?: string | null, field?: string | null): Promise<CharacterApiResponse> => {
   const params: CharacterParams = {}
 
   if (term) {
