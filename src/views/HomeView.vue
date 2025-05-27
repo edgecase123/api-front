@@ -4,9 +4,13 @@ import type Character from '@/types/Character.ts'
 import { getCharacters } from '@/composables/api.ts'
 import type { CharacterApiResponse } from '@/types/CharacterApiResponse.ts'
 import SearchInput, { type SearchPayloadEvent } from '@/components/SearchInput.vue'
+import SearchManager from '@/components/SearchManager.vue'
 
 const data = ref<Character[]>([])
 const loading = ref(false)
+const searchManager = ref<InstanceType<typeof SearchManager> | null>(null)
+const showSearchManager = ref(false)
+const searchInput = ref<InstanceType<typeof SearchInput> | null>(null)
 
 const handleSearch = async (payload: SearchPayloadEvent) => {
   if (!payload) {
@@ -20,6 +24,31 @@ const handleSearch = async (payload: SearchPayloadEvent) => {
 
 const handleSave = (payload: SearchPayloadEvent) => {
   console.log('handleSave', payload)
+
+  if (payload && payload.selectedField && payload.searchTerm) {
+    showSearchManager.value = true
+
+    searchManager.value?.triggerShowForm({
+      term: payload.searchTerm,
+      field: payload.selectedField,
+    })
+  }
+}
+
+// Handle use-search event
+const handleUseSearch = async (search: { term: string; field: string }) => {
+  console.log('Using a saved search', search)
+  showSearchManager.value = false
+  searchInput.value?.setSearch(search.term, search.field)
+  await fetchData({ searchTerm: search.term, selectedField: search.field })
+}
+
+const handleManageSearch = () => {
+  showSearchManager.value = true
+}
+
+const handleHideSearch = async () => {
+  showSearchManager.value = false
 }
 
 const fetchData = async (searchData?: SearchPayloadEvent | null) => {
@@ -29,7 +58,7 @@ const fetchData = async (searchData?: SearchPayloadEvent | null) => {
   try {
     const response: CharacterApiResponse = await getCharacters(
       searchData?.searchTerm ?? null,
-      searchData?.selectedField ?? null
+      searchData?.selectedField ?? null,
     )
 
     console.log(response)
@@ -41,7 +70,10 @@ const fetchData = async (searchData?: SearchPayloadEvent | null) => {
   }
 }
 
-onMounted(fetchData)
+onMounted(() => {
+  fetchData()
+  document.title = 'LoR Character Search'
+})
 </script>
 <template>
   <div class="flex w-full mx-auto md:mt-40">
@@ -53,26 +85,33 @@ onMounted(fetchData)
             <span class="text-neutral-400">Records: {{ data.length }}</span>
           </div>
         </div>
+
         <div class="flex gap-2">
           <div class="dropdown dropdown-end">
             <div tabindex="0" class="btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">
-                <img
-                  alt="Tailwind CSS Navbar component"
-                  :src="'/images/gandalf.png'"
-                />
+                <img alt="Tailwind CSS Navbar component" :src="'/images/gandalf.png'" />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="pt-4 pb-2 float-right">
+      <div v-show="showSearchManager" class="flex w-full">
+        <SearchManager
+          ref="searchManager"
+          @use-search="handleUseSearch"
+          @cancel-search="handleHideSearch" />
+      </div>
+
+      <div v-show="!showSearchManager" class="pt-4 pb-2 float-right">
         <SearchInput
-          :fields="{name: 'Name', race: 'Race'}"
+          :fields="{ name: 'Name', race: 'Race' }"
           :min-chars="3"
+          ref="searchInput"
           @search="handleSearch"
           @save="handleSave"
+          @manageSearch="handleManageSearch"
         />
       </div>
 
@@ -95,9 +134,7 @@ onMounted(fetchData)
             </tr>
 
             <tr v-if="loading">
-              <td :colspan="4" class="text-center py-4 text-secondary text-2xl">
-                Loading...
-              </td>
+              <td :colspan="4" class="text-center py-4 text-secondary text-2xl">Loading...</td>
             </tr>
 
             <tr class="p-0" v-for="(item, index) in data" :key="index">
