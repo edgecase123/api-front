@@ -23,7 +23,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['search', 'save'],
+  emits: ['search', 'save', 'manage-search'],
   setup(props: Props, { emit }) {
     const searchTerm = ref('')
     const selectedField = ref(Object.keys(props.fields)[0] ?? '')
@@ -68,6 +68,16 @@ export default defineComponent({
       }
     }
 
+    const setSearch = (term: string, field: string) => {
+      searchTerm.value = term
+      selectedField.value = field
+    }
+
+    const manageSearch = () => {
+      console.log('emitting event manage-search')
+      emit('manage-search')
+    }
+
     const clearSearch = () => {
       searchTerm.value = ''
       emit('search', null)
@@ -92,6 +102,8 @@ export default defineComponent({
       handleInput,
       saveSearch,
       clearSearch,
+      manageSearch,
+      setSearch,
     }
   },
 })
@@ -120,16 +132,28 @@ export default defineComponent({
     </select>
 
     <!-- Utility buttons -->
-    <div class="flex flex-row gap-2 w-1/3">
+    <div class="flex flex-row gap-2 w-1/2">
       <button
+        id="btn-save-search"
         class="btn btn-primary flex-1"
+        title="Save this search"
         :disabled="!searchTerm || !selectedField || searchTerm.length < minChars"
         @click="saveSearch"
       >
         Save
       </button>
-      <button class="btn btn-ghost flex-1" @click="clearSearch">
-        Clear
+      <button class="btn btn-secondary flex-1"
+          @click="clearSearch"
+          title="Clear Filter"
+          :disabled="searchTerm.length < minChars">
+        <i class="bx bx-block text-2xl"></i>
+      </button>
+      <button
+        id="btn-manager-search"
+        @click="manageSearch"
+        class="btn btn-secondary flex-1"
+        title="Manage saved searches">
+        <i class="bx bx-cog text-2xl"></i>
       </button>
     </div>
   </div>
