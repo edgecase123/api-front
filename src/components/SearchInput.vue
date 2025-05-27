@@ -2,7 +2,7 @@
 import { defineComponent, ref, watch } from 'vue'
 
 export interface Props {
-  minChars: number,
+  minChars: number
   fields: Record<string, string>
 }
 
@@ -85,10 +85,7 @@ export default defineComponent({
 
     // We need to observe selected field and conditionally trigger search
     watch(selectedField, () => {
-      if (
-        searchTerm.value.length >= props.minChars &&
-        selectedField.value
-      ) {
+      if (searchTerm.value.length >= props.minChars && selectedField.value) {
         emit('search', {
           searchTerm: searchTerm.value,
           selectedField: selectedField.value,
@@ -111,51 +108,54 @@ export default defineComponent({
 
 <template>
   <div class="flex flex-row items-center gap-4 w-full max-w-3xl mx-auto">
-  <div class="flex flex-row items-center gap-4 w-full">
-    <!-- Search input -->
-    <input
-      v-model="searchTerm"
-      type="text"
-      class="input input-neutral w-1/3"
-      placeholder="Enter search term..."
-      pattern="^[A-Za-z][A-Za-z0-9]*$"
-      @input="handleInput"
-      @keyup.esc="clearSearch"
-    />
+    <div class="flex flex-row items-center gap-4 w-full">
+      <!-- Search input -->
+      <input
+        v-model="searchTerm"
+        type="text"
+        class="input input-neutral w-1/3"
+        placeholder="Enter search term..."
+        pattern="^[A-Za-z][A-Za-z0-9]*$"
+        @input="handleInput"
+        @keyup.esc="clearSearch"
+      />
 
-    <!-- Select dropdown -->
-    <select v-model="selectedField" class="select border-neutral w-1/3">
-      <option value="" disabled>Select a field</option>
-      <option v-for="(label, key) in fields" :key="key" :value="key">
-        {{ label }}
-      </option>
-    </select>
+      <!-- Select dropdown -->
+      <select v-model="selectedField" class="select border-neutral w-1/3">
+        <option value="" disabled>Select a field</option>
+        <option v-for="(label, key) in fields" :key="key" :value="key">
+          {{ label }}
+        </option>
+      </select>
 
-    <!-- Utility buttons -->
-    <div class="flex flex-row gap-2 w-1/2">
-      <button
-        id="btn-save-search"
-        class="btn btn-primary flex-1"
-        title="Save this search"
-        :disabled="!searchTerm || !selectedField || searchTerm.length < minChars"
-        @click="saveSearch"
-      >
-        Save
-      </button>
-      <button class="btn btn-secondary flex-1"
+      <!-- Utility buttons -->
+      <div class="flex flex-row gap-2 w-1/2">
+        <button
+          id="btn-save-search"
+          class="btn btn-primary flex-1"
+          title="Save this search"
+          :disabled="!searchTerm || !selectedField || searchTerm.length < minChars"
+          @click="saveSearch"
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-secondary flex-1"
           @click="clearSearch"
           title="Clear Filter"
-          :disabled="searchTerm.length < minChars">
-        <i class="bx bx-block text-2xl"></i>
-      </button>
-      <button
-        id="btn-manager-search"
-        @click="manageSearch"
-        class="btn btn-secondary flex-1"
-        title="Manage saved searches">
-        <i class="bx bx-cog text-2xl"></i>
-      </button>
+          :disabled="searchTerm.length < minChars"
+        >
+          <i class="bx bx-block text-2xl"></i>
+        </button>
+        <button
+          id="btn-manager-search"
+          @click="manageSearch"
+          class="btn btn-secondary flex-1"
+          title="Manage saved searches"
+        >
+          <i class="bx bx-cog text-2xl"></i>
+        </button>
+      </div>
     </div>
   </div>
-</div>
 </template>

@@ -1,22 +1,22 @@
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import axios from 'axios';
+import { defineComponent, ref, onMounted } from 'vue'
+import axios from 'axios'
 
 // Interfaces
 interface SearchList {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
 interface Search {
-  id: number;
-  term: string;
-  field: string;
+  id: number
+  term: string
+  field: string
 }
 
 export interface SearchInput {
-  term: string;
-  field: string;
+  term: string
+  field: string
 }
 
 export default defineComponent({
@@ -24,22 +24,22 @@ export default defineComponent({
   emits: ['use-search', 'cancel-search'],
   setup(_, { emit }) {
     // Reactive state
-    const searchLists = ref<SearchList[]>([]);
-    const searches = ref<Search[]>([]);
-    const selectedSearchListId = ref<string>('');
-    const isLoadingSearchLists = ref<boolean>(false);
-    const isLoadingSearches = ref<boolean>(false);
-    const isSaving = ref<boolean>(false);
-    const errorMessage = ref<string>('');
-    const form = ref<SearchInput>({ term: '', field: '' });
-    const showForm = ref<boolean>(false);
+    const searchLists = ref<SearchList[]>([])
+    const searches = ref<Search[]>([])
+    const selectedSearchListId = ref<string>('')
+    const isLoadingSearchLists = ref<boolean>(false)
+    const isLoadingSearches = ref<boolean>(false)
+    const isSaving = ref<boolean>(false)
+    const errorMessage = ref<string>('')
+    const form = ref<SearchInput>({ term: '', field: '' })
+    const showForm = ref<boolean>(false)
     const newSearchListName = ref<string | null>(null)
 
     // Show the form and pre-fill form data/fields
     const triggerShowForm = (payload: SearchInput) => {
-      form.value = { term: payload.term, field: payload.field };
-      showForm.value = true;
-    };
+      form.value = { term: payload.term, field: payload.field }
+      showForm.value = true
+    }
 
     // Fetch favorite SearchLists from Laravel
     const fetchSearchLists = async () => {
@@ -67,7 +67,8 @@ export default defineComponent({
       isLoadingSearches.value = true
       try {
         // /searchlist/{id}/searches
-        const url = import.meta.env.VITE_APP_BACKEND + `/searchlist/${selectedSearchListId.value}/searches`
+        const url =
+          import.meta.env.VITE_APP_BACKEND + `/searchlist/${selectedSearchListId.value}/searches`
         const response = await axios.get(url)
         searches.value = response.data
       } catch (error) {
@@ -82,8 +83,8 @@ export default defineComponent({
     const createSearchList = async () => {
       if (!newSearchListName.value) {
         errorMessage.value = 'A name for the new SearchList is required'
-        const newNameInput = document.getElementById('newSearchListName');
-        if (newNameInput) newNameInput.focus();
+        const newNameInput = document.getElementById('newSearchListName')
+        if (newNameInput) newNameInput.focus()
 
         return
       }
@@ -95,7 +96,7 @@ export default defineComponent({
         const url = import.meta.env.VITE_APP_BACKEND + `/searchlist`
 
         const response = await axios.post(url, {
-          name: newSearchListName.value
+          name: newSearchListName.value,
         })
 
         console.log(response)
@@ -131,7 +132,8 @@ export default defineComponent({
       errorMessage.value = ''
 
       try {
-        const url = import.meta.env.VITE_APP_BACKEND + `/searchlist/${selectedSearchListId.value}/searches`
+        const url =
+          import.meta.env.VITE_APP_BACKEND + `/searchlist/${selectedSearchListId.value}/searches`
 
         const response = await axios.post(url, {
           term: form.value.term,
@@ -153,14 +155,15 @@ export default defineComponent({
         } else {
           errorMessage.value = 'Failed to save search'
         }
-
       } finally {
         isSaving.value = false
       }
     }
 
     const deleteSearchList = async () => {
-      if (!selectedSearchListId.value) {return}
+      if (!selectedSearchListId.value) {
+        return
+      }
 
       if (!confirm(`Delete the selected SearchList?`)) {
         return
@@ -193,7 +196,8 @@ export default defineComponent({
 
       try {
         ///searchlist/{listId}/searches/{searchId}/delete
-        const url = import.meta.env.VITE_APP_BACKEND +
+        const url =
+          import.meta.env.VITE_APP_BACKEND +
           `/searchlist/${selectedSearchListId.value}` +
           `/searches/${searchId}`
 
@@ -265,11 +269,7 @@ export default defineComponent({
         @change="fetchSearches"
         size="5"
       >
-        <option
-          v-for="list in searchLists"
-          :key="list.id"
-          :value="list.id"
-        >
+        <option v-for="list in searchLists" :key="list.id" :value="list.id">
           {{ list.name }}
         </option>
       </select>
@@ -290,10 +290,7 @@ export default defineComponent({
         >
           Add
         </button>
-        <button
-          class="btn btn-error btn-sm flex-1 max-w-18 float-right"
-          @click="deleteSearchList"
-        >
+        <button class="btn btn-error btn-sm flex-1 max-w-18 float-right" @click="deleteSearchList">
           Delete
         </button>
       </div>
@@ -306,39 +303,36 @@ export default defineComponent({
       </div>
       <!-- Saved Searches Table -->
       <div v-show="!showForm" class="overflow-y-auto min-h-36 max-h-40">
-        <table class="table text-sm ">
+        <table class="table text-sm">
           <thead>
-          <tr>
-            <th>Term</th>
-            <th>Field</th>
-            <th class="float-right">Actions</th>
-          </tr>
+            <tr>
+              <th>Term</th>
+              <th>Field</th>
+              <th class="float-right">Actions</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-if="isLoadingSearches">
-            <td colspan="4" class="text-center">Loading searches...</td>
-          </tr>
-          <tr v-else-if="searches.length === 0">
-            <td colspan="4" class="text-center">No searches found</td>
-          </tr>
-          <tr v-else v-for="search in searches" :key="search.id">
-            <td>{{ search.term }}</td>
-            <td>{{ search.field }}</td>
-            <td class="p-4">
-              <button
-                class="btn btn-xs btn-secondary mr-2 float-right"
-                @click="useSearch(search)"
-              >
-                Use
-              </button>
-              <button
-                class="btn btn-xs btn-error float-right"
-                @click="deleteSearch(search.id)"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
+            <tr v-if="isLoadingSearches">
+              <td colspan="4" class="text-center">Loading searches...</td>
+            </tr>
+            <tr v-else-if="searches.length === 0">
+              <td colspan="4" class="text-center">No searches found</td>
+            </tr>
+            <tr v-else v-for="search in searches" :key="search.id">
+              <td>{{ search.term }}</td>
+              <td>{{ search.field }}</td>
+              <td class="p-4">
+                <button
+                  class="btn btn-xs btn-secondary mr-2 float-right"
+                  @click="useSearch(search)"
+                >
+                  Use
+                </button>
+                <button class="btn btn-xs btn-error float-right" @click="deleteSearch(search.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -350,11 +344,8 @@ export default defineComponent({
       <div v-if="showForm" class="card bg-base-100 shadow-xl p-4">
         <h2 class="text-lg font-bold mb-4">Add New Search</h2>
         <form @submit.prevent="saveSearch" class="flex flex-col gap-4">
-
           <div class="form-control">
-            <label class="label mr-10">
-              <span class="label-text">Term</span>&nbsp;&nbsp;
-            </label>
+            <label class="label mr-10"> <span class="label-text">Term</span>&nbsp;&nbsp; </label>
             <input
               v-model="form.term"
               type="text"
@@ -366,9 +357,7 @@ export default defineComponent({
           </div>
 
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">Field</span>&nbsp;&nbsp;
-            </label>
+            <label class="label"> <span class="label-text">Field</span>&nbsp;&nbsp; </label>
             <input
               v-model="form.field"
               type="text"
@@ -389,12 +378,7 @@ export default defineComponent({
               {{ isSaving ? 'Saving...' : 'Save' }}
             </button>
 
-            <button
-              type="button"
-              class="btn btn-ghost"
-              @click="resetForm"
-              :disabled="isSaving"
-            >
+            <button type="button" class="btn btn-ghost" @click="resetForm" :disabled="isSaving">
               Cancel
             </button>
           </div>
@@ -410,10 +394,7 @@ export default defineComponent({
           {{ errorMessage }}
         </p>
 
-        <button
-          class="btn btn-error btn-sm flex-1 max-w-18 float-right"
-          @click="exitSearch"
-        >
+        <button class="btn btn-error btn-sm flex-1 max-w-18 float-right" @click="exitSearch">
           Close
         </button>
       </div>

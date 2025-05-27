@@ -101,7 +101,8 @@ onMounted(() => {
         <SearchManager
           ref="searchManager"
           @use-search="handleUseSearch"
-          @cancel-search="handleHideSearch" />
+          @cancel-search="handleHideSearch"
+        />
       </div>
 
       <div v-show="!showSearchManager" class="pt-4 pb-2 float-right">

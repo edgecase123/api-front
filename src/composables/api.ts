@@ -1,4 +1,4 @@
-import axios, {type AxiosResponse} from "axios";
+import axios, { type AxiosResponse } from 'axios'
 import type { CharacterApiResponse } from '@/types/CharacterApiResponse.ts'
 
 const api = axios.create({
@@ -8,11 +8,14 @@ const api = axios.create({
 })
 
 interface CharacterParams {
-  term?: string | null,
-  field?: string | null,
+  term?: string | null
+  field?: string | null
 }
 
-export const getCharacters = async (term?: string | null, field?: string | null): Promise<CharacterApiResponse> => {
+export const getCharacters = async (
+  term?: string | null,
+  field?: string | null,
+): Promise<CharacterApiResponse> => {
   const params: CharacterParams = {}
 
   if (term) {
@@ -32,9 +35,9 @@ export const getCharacters = async (term?: string | null, field?: string | null)
 }
 
 export const getCookieValue = (name: string): string | null => {
-  const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
-  return match ? decodeURIComponent(match[2]) : null;
-};
+  const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'))
+  return match ? decodeURIComponent(match[2]) : null
+}
 
 export const getCsrfToken = async () => {
   await api.get('sanctum/csrf-cookie')
