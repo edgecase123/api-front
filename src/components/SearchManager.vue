@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
 import axios from 'axios'
+import moment from 'moment'
 
 // Interfaces
 interface SearchList {
@@ -12,6 +13,7 @@ interface Search {
   id: number
   term: string
   field: string
+  updated_at: string
 }
 
 export interface SearchInput {
@@ -21,6 +23,11 @@ export interface SearchInput {
 
 export default defineComponent({
   name: 'SearchManager',
+  computed: {
+    moment() {
+      return moment
+    }
+  },
   emits: ['use-search', 'cancel-search'],
   setup(_, { emit }) {
     // Reactive state
@@ -70,7 +77,8 @@ export default defineComponent({
         const url =
           import.meta.env.VITE_APP_BACKEND + `/searchlist/${selectedSearchListId.value}/searches`
         const response = await axios.get(url)
-        searches.value = response.data
+        console.log('Searches return', response.data)
+        searches.value = response.data as Search[]
       } catch (error) {
         console.error('Error fetching searches:', error)
         searches.value = []
@@ -308,6 +316,7 @@ export default defineComponent({
             <tr>
               <th>Term</th>
               <th>Field</th>
+              <th>Saved</th>
               <th class="float-right">Actions</th>
             </tr>
           </thead>
@@ -321,6 +330,7 @@ export default defineComponent({
             <tr v-else v-for="search in searches" :key="search.id">
               <td>{{ search.term }}</td>
               <td>{{ search.field }}</td>
+              <td>{{ moment(search.updated_at).format('YYYY-MM-DD hh:mm A') }}</td>
               <td class="p-4">
                 <button
                   class="btn btn-xs btn-secondary mr-2 float-right"
