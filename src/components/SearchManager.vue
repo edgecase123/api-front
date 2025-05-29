@@ -148,7 +148,7 @@ export default defineComponent({
           field: form.value.field,
         })
 
-        if (response.status === 409) {
+        if (response.status === 419) {
           errorMessage.value = 'Attempt to save duplicate search to same list. Choose another list.'
           return
         }
