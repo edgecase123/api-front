@@ -84,6 +84,8 @@ export default defineComponent({
     }
 
     const clearSearch = () => {
+      if (searchTerm.value.length < props.minChars) {return}
+
       searchTerm.value = ''
       emit('search', null)
     }
