@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
+import type { SearchData } from '@/components/SearchManager.vue'
 
 export interface Props {
   minChars: number
@@ -73,12 +74,18 @@ export default defineComponent({
       selectedField.value = field
     }
 
+    const getSearch = (): SearchData => {
+      return {term: searchTerm.value, field: selectedField.value}
+    }
+
     const manageSearch = () => {
       console.log('emitting event manage-search')
       emit('manage-search')
     }
 
     const clearSearch = () => {
+      if (searchTerm.value.length < props.minChars) {return}
+
       searchTerm.value = ''
       emit('search', null)
     }
@@ -101,6 +108,7 @@ export default defineComponent({
       clearSearch,
       manageSearch,
       setSearch,
+      getSearch,
     }
   },
 })

@@ -16,7 +16,7 @@ interface Search {
   updated_at: string
 }
 
-export interface SearchInput {
+export interface SearchData {
   term: string
   field: string
 }
@@ -28,7 +28,7 @@ export default defineComponent({
       return moment
     }
   },
-  emits: ['use-search', 'cancel-search'],
+  emits: ['use-search', 'cancel-search', 'search-deleted'],
   setup(_, { emit }) {
     // Reactive state
     const searchLists = ref<SearchList[]>([])
@@ -38,12 +38,12 @@ export default defineComponent({
     const isLoadingSearches = ref<boolean>(false)
     const isSaving = ref<boolean>(false)
     const errorMessage = ref<string>('')
-    const form = ref<SearchInput>({ term: '', field: '' })
+    const form = ref<SearchData>({ term: '', field: '' })
     const showForm = ref<boolean>(false)
     const newSearchListName = ref<string | null>(null)
 
     // Show the form and pre-fill form data/fields
-    const triggerShowForm = (payload: SearchInput) => {
+    const triggerShowForm = (payload: SearchData) => {
       form.value = { term: payload.term, field: payload.field }
       showForm.value = true
     }
@@ -196,10 +196,11 @@ export default defineComponent({
     }
 
     /**
-     * delete a saved search.
-     * @param searchId
+     * Delete a saved search. Checks if the search that is deleted is the
+     * current search and resets, if so.
+     * @param search
      */
-    const deleteSearch = async (searchId: number) => {
+    const deleteSearch = async (search: Search) => {
       if (!confirm('Are you sure you want to delete this search?')) return
 
       try {
@@ -207,10 +208,11 @@ export default defineComponent({
         const url =
           import.meta.env.VITE_APP_BACKEND +
           `/searchlist/${selectedSearchListId.value}` +
-          `/searches/${searchId}`
+          `/searches/${search.id}`
 
         await axios.delete(url)
         await fetchSearches()
+        emit('search-deleted', {term: search.term, field: search.field})
       } catch (error) {
         console.error('Error deleting search:', error)
       }
@@ -310,8 +312,8 @@ export default defineComponent({
         <h2 class="text-secondary">Search Count: {{ searches.length }}</h2>
       </div>
       <!-- Saved Searches Table -->
-      <div v-show="!showForm" class="overflow-y-auto min-h-36 max-h-40">
-        <table class="table text-sm">
+      <div v-show="!showForm" class="overflow-y-auto min-h-36 max-h-36">
+        <table class="table text-lg">
           <thead>
             <tr>
               <th>Term</th>
@@ -338,7 +340,7 @@ export default defineComponent({
                 >
                   Use
                 </button>
-                <button class="btn btn-xs btn-error float-right" @click="deleteSearch(search.id)">
+                <button class="btn btn-xs btn-error float-right" @click="deleteSearch(search)">
                   Delete
                 </button>
               </td>

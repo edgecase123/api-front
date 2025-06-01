@@ -4,7 +4,7 @@ import type Character from '@/types/Character.ts'
 import { getCharacters } from '@/composables/api.ts'
 import type { CharacterApiResponse } from '@/types/CharacterApiResponse.ts'
 import SearchInput, { type SearchPayloadEvent } from '@/components/SearchInput.vue'
-import SearchManager from '@/components/SearchManager.vue'
+import SearchManager, { type SearchData } from '@/components/SearchManager.vue'
 
 const data = ref<Character[]>([])
 const loading = ref(false)
@@ -41,6 +41,13 @@ const handleUseSearch = async (search: { term: string; field: string }) => {
   showSearchManager.value = false
   searchInput.value?.setSearch(search.term, search.field)
   await fetchData({ searchTerm: search.term, selectedField: search.field })
+}
+
+const handleSearchDeleted = async (search: SearchData) => {
+  const current = searchInput.value?.getSearch()
+  if (current?.term === search.term && current?.field === search.field) {
+    searchInput.value?.clearSearch()
+  }
 }
 
 const handleManageSearch = () => {
@@ -102,6 +109,7 @@ onMounted(() => {
           ref="searchManager"
           @use-search="handleUseSearch"
           @cancel-search="handleHideSearch"
+          @search-deleted="handleSearchDeleted"
         />
       </div>
 
